@@ -1,20 +1,32 @@
+import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_list/firebase_function.dart';
+import 'package:todo_list/provider/app_provider.dart';
 import 'package:todo_list/provider/list_provider.dart';
 import '../home/app_colors.dart';
 import '../model/task.dart';
+import '../provider/auth_user_Provider.dart';
+import 'edit_task_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class TaskListItem extends StatelessWidget {
+class TaskListItem extends StatefulWidget {
   Task task;
   TaskListItem({required this.task, super.key});
 
+  @override
+  State<TaskListItem> createState() => _TaskListItemState();
+}
+
+class _TaskListItemState extends State<TaskListItem> {
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var listProvider = Provider.of<ListProvider>(context);
+    var authProvider = Provider.of<AuthUserProvider>(context);
+    var provider = Provider.of<AppProvider>(context);
     return Container(
       margin: const EdgeInsets.all(12),
       child:
@@ -68,22 +80,28 @@ class TaskListItem extends StatelessWidget {
             SlidableAction(
               onPressed: (context) {
                 // delete
-                FirebaseFunction.deleteTaskFromFireStore(task)
+                FirebaseFunction.deleteTaskFromFireStore(widget.task, authProvider.currentUser!.id!).
+                then((value) {
+                  print('tasked deleted successfully');
+                  listProvider.getAllTasksFromFireStore(authProvider.currentUser!.id!);
+                } )
                     .timeout(Duration(seconds: 1), onTimeout: () {
                   print('tasked deleted successfully');
-                  listProvider.getAllTasksFromFireStore();
+                  listProvider.getAllTasksFromFireStore(authProvider.currentUser!.id!);
                 });
               },
               icon: Icons.delete,
               backgroundColor: Colors.red,
-              label: 'delete',
+              label: AppLocalizations.of(context)!.delete,
               borderRadius: BorderRadius.all(Radius.circular(15)),
             ),
             SlidableAction(
-              onPressed: (_) {},
+              onPressed: (_) {
+                Navigator.pushNamed(context, EditTaskScreen.routeName, arguments: widget.task);
+              },
               icon: Icons.edit,
               backgroundColor: Colors.blue,
-              label: 'edit',
+              label: AppLocalizations.of(context)!.edit,
               borderRadius: BorderRadius.all(Radius.circular(15))
             ),
           ],
@@ -91,14 +109,16 @@ class TaskListItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-              color: AppColors.whiteColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
               borderRadius: BorderRadius.circular(22)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 margin: EdgeInsets.all(12),
-                color: AppColors.primaryColor,
+                color: widget.task.isDone ? AppColors.greenColor :AppColors.primaryColor,
                 height: height * 0.1,
                 width: 4,
               ),
@@ -107,32 +127,43 @@ class TaskListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      task.title,
+                      widget.task.title,
                       // copyWith to edit
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.primaryColor,
+                          color: widget.task.isDone ? AppColors.greenColor :AppColors.primaryColor,
                           fontWeight: FontWeight.w500),
                     ),
                     Text(
-                      task.description,
+                      widget.task.description,
                       style: Theme.of(context).textTheme.titleMedium,
                     )
                   ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  vertical: height * 0.01,
-                  horizontal: width * 0.05,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: AppColors.primaryColor,
-                ),
-                child: Icon(
-                  Icons.check,
-                  size: 35,
-                  color: AppColors.whiteColor,
+              InkWell(
+                onTap: (){
+                  var authProvider = Provider.of<AuthUserProvider>(context, listen: false);
+                  FirebaseFunction.editIsDone(widget.task, authProvider.currentUser?.id ??"");
+                  widget.task.isDone = !widget.task.isDone;
+                  setState(() {
+
+                  });
+                },
+                child: widget.task.isDone ? Text(AppLocalizations.of(context)!.done,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.greenColor),): Container(
+                  padding: EdgeInsets.symmetric(
+                    vertical: height * 0.01,
+                    horizontal: width * 0.05,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.primaryColor,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    size: 35,
+                    color: AppColors.whiteColor,
+                  ),
                 ),
               ),
             ],

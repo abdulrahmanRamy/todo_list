@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_list/firebase_function.dart';
 import 'package:todo_list/model/task.dart';
+import '../provider/app_provider.dart';
+import '../provider/auth_user_Provider.dart';
 import '../provider/list_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddtTaskButtomSheet extends StatefulWidget {
 
@@ -21,13 +24,14 @@ class _AddtTaskButtomSheetState extends State<AddtTaskButtomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<AppProvider>(context);
     listProvider = Provider.of<ListProvider>(context);
     return Container(
       margin: const EdgeInsets.all(12),
       child: Column(
         children: [
-          Text('Add new Task',
-          style: Theme.of(context).textTheme.titleMedium,
+          Text(AppLocalizations.of(context)!.add_new_task,
+          style: Theme.of(context).textTheme.bodyLarge,
           ),
           Form(
             key: formKey,
@@ -44,8 +48,12 @@ class _AddtTaskButtomSheetState extends State<AddtTaskButtomSheet> {
                   onChanged: (text){
                     title = text;
                   },
-                  decoration: const InputDecoration(
-                    hintText: ('Enter Task Title'),
+                  decoration:  InputDecoration(
+                    hintText: AppLocalizations.of(context)!.enter_task_title,
+                    fillColor: Colors.grey.shade300,
+                    filled: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
                   ),
                 ),
                 const SizedBox(
@@ -61,13 +69,17 @@ class _AddtTaskButtomSheetState extends State<AddtTaskButtomSheet> {
                   onChanged: (text){
                     description = text;
                   },
-                  decoration: const InputDecoration(
-                    hintText: ('Enter Task Description'),
+                  decoration:  InputDecoration(
+                    hintText: AppLocalizations.of(context)!.enter_task_description,
+                    fillColor: Colors.grey.shade300,
+                    filled: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide.none),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Select Date',
+                  child: Text(AppLocalizations.of(context)!.select_date,
                   style: Theme.of(context).textTheme.bodyLarge,),
                 ),
                 Padding(
@@ -85,7 +97,7 @@ class _AddtTaskButtomSheetState extends State<AddtTaskButtomSheet> {
                     onPressed: (){
                       addTask();
                     },
-                    child: Text('Add',
+                    child: Text(AppLocalizations.of(context)!.add_new_task,
                       style: Theme.of(context).textTheme.titleLarge,),
                 ),
               ],
@@ -107,10 +119,17 @@ class _AddtTaskButtomSheetState extends State<AddtTaskButtomSheet> {
           description: description,
           dateTime: selectedDate,
       );
-       FirebaseFunction.addTaskToFirebase(task).timeout(Duration(seconds: 1),
+      var authProvider = Provider.of<AuthUserProvider>(context,listen: false);
+       FirebaseFunction.addTaskToFirebase(task,authProvider.currentUser!.id!)
+           .then((value){
+         print('task added successfully');
+         listProvider.getAllTasksFromFireStore(authProvider.currentUser!.id!);
+         Navigator.pop(context);
+       })
+           .timeout(Duration(seconds: 1),
       onTimeout: (){
         print('task added successfully');
-        listProvider.getAllTasksFromFireStore();
+        listProvider.getAllTasksFromFireStore(authProvider.currentUser!.id!);
         Navigator.pop(context);
       });
     }

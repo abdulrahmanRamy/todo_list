@@ -1,0 +1,23 @@
+{
+"todo_list" : "قائمة مهام",
+"task" : "مهمه",
+"description" : "وصف",
+"enter_task_title" : "ادخل المهمه",
+"enter_task_description" : "ادخل الوصف",
+"select_date" : "اختار التاريخ",
+"add_new_task" : "اضافة مهمة",
+"save_changes" : "حفظ التغيرات",
+"theme" : "ثمة",
+"light" : "نهاري",
+"dark" : "ليلي",
+"edit" : "تعديل",
+"edit_task" : "تعديل المهمة",
+"delete" : "حذف",
+"language" : "اللغة",
+"arabic" : "العربية",
+"english" : "الانجليزية",
+"done" : "تم.!",
+"add" : "اضافة",
+"task_edit_successfully" : "تم التعديل بنجاح",
+"error" : "خطأ"
+}

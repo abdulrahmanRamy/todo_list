@@ -1,0 +1,23 @@
+{
+"todo_list" : "ToDO List",
+"task" : "task",
+"description" : "description",
+"enter_task_title" : "ُEnter Task Title",
+"enter_task_description" : "ُEnter Task description",
+"select_date" : "Select Date",
+"add_new_task" : "Add new Task",
+"save_changes" : "Save Changes",
+"light" : "Light",
+"dark" : "Dark",
+"edit" : "edit",
+"edit_task" : "Edit Task",
+"delete" : "delete",
+"language" : "Language",
+"arabic" : "Arabic",
+"english" : "English",
+"theme" : "Theme",
+"done" : "Done.!",
+"add" : "Add",
+"task_edit_successfully" : "Task Edit Successfully",
+"error" : "Error"
+}
